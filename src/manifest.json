@@ -1,0 +1,40 @@
+{
+  "name": "Proxy",
+  "version": "0.0.1",
+  "description": "__MSG_manifestDesc__",
+  "manifest_version": 2,
+  "background": {
+    "scripts": [
+      "index.js"
+    ],
+    "persistent": true
+  },
+  "options_page": "pages/options/index.html",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>",
+    "tabs"
+  ],
+  "browser_action": {
+    "browser_style": true,
+    "default_title": "代理转发",
+    "default_popup": "pages/popup/index.html",
+    "default_icon": {
+      "32": "assets/icon@32.png",
+      "48": "assets/icon@48.png",
+      "64": "assets/icon@64.png",
+      "128": "assets/icon@128.png"
+    }
+  },
+  "icons": {
+    "32": "assets/icon@32.png",
+    "48": "assets/icon@48.png",
+    "64": "assets/icon@64.png",
+    "128": "assets/icon@128.png"
+  },
+  "web_accessible_resources": [],
+  "default_locale": "zh_CN"
+}

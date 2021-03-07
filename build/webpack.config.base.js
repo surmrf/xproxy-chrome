@@ -1,6 +1,7 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
+const WebpackBar = require('webpackbar');
 
 const config = {
   context: path.join(__dirname, '..'),
@@ -21,6 +22,7 @@ const config = {
       '@': path.join(__dirname, '../src'),
     },
   },
+  stats: 'errors-only',
   module: {
     rules: [
       {
@@ -35,6 +37,7 @@ const config = {
                   '@babel/preset-env',
                   {
                     useBuiltIns: 'entry',
+                    corejs: '3',
                   },
                 ],
                 '@babel/preset-typescript',
@@ -113,6 +116,7 @@ const config = {
       filename: 'pages/home/index.html',
       template: path.join(__dirname, '../src/template/index.html'),
     }),
+    new WebpackBar(),
   ],
 };
 

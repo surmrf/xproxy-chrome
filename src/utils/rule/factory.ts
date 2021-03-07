@@ -26,15 +26,17 @@ export function createGroup({ name }: { name?: Group['name'] } = {}): Group {
 
 export function createRule({
   type,
-  patternType,
   pattern,
   destination,
+  condition,
+  conditionType,
 }: Omit<Rule, 'id'>): Rule {
   return {
     id: uuid(),
     type,
-    patternType,
     pattern,
+    condition,
+    conditionType,
     destination,
   };
 }

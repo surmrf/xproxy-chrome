@@ -1,3 +1,4 @@
+import validUrl from 'valid-url';
 import type { Rule } from './type';
 
 type RuleType = Rule['type'];
@@ -13,6 +14,7 @@ class RuleBase implements TRuleBase {
   protected ruleType: RuleType;
   protected conditionRE: RegExp;
   protected patternRE: RegExp;
+  protected error: boolean;
 
   constructor(rule: Rule) {
     this.rule = rule;
@@ -20,29 +22,41 @@ class RuleBase implements TRuleBase {
   }
 
   init() {
-    this.ruleType = this.rule.type;
+    try {
+      this.ruleType = this.rule.type;
 
-    const pattern = this.rule.pattern.trim().replace(/(^\/|\/$)/gi, '');
-    this.patternRE = new RegExp(pattern, 'g');
+      const pattern = this.rule.pattern.trim().replace(/(^\/|\/$)/gi, '');
+      this.patternRE = new RegExp(pattern, 'g');
 
-    const condition = this.rule.condition.trim().replace(/(^\/|\/$)/gi, '');
-    this.conditionRE = new RegExp(condition, 'g');
+      const condition = this.rule.condition.trim().replace(/(^\/|\/$)/gi, '');
+      this.conditionRE = new RegExp(condition, 'g');
+    } catch (error) {
+      console.error(error);
+      this.error = true;
+    }
+  }
+
+  hasError(): boolean {
+    return this.error;
   }
 
   replace(url: string): Resp {
-    if (url.includes('d-vision')) {
-      console.log('input', url);
-    }
-
     if (this.conditionRE && !this.conditionRE.test(url)) {
       return null;
     }
 
-    console.log('output', url);
+    let newUrl = '';
 
-    const newUrl = url.replace(this.patternRE, this.rule.destination);
+    try {
+      newUrl = url.replace(this.patternRE, this.rule.destination);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
 
     if (newUrl === url) return null;
+
+    if (!validUrl.isUri(newUrl)) return null;
 
     return {
       redirectUrl: newUrl,
@@ -50,7 +64,7 @@ class RuleBase implements TRuleBase {
   }
 
   redirect(url: string): Resp {
-    if (this.patternRE.test(url)) {
+    if (this.patternRE.test(url) && validUrl.isUri(this.rule.destination)) {
       return {
         redirectUrl: this.rule.destination,
       };
@@ -86,6 +100,8 @@ class RuleMatch extends RuleBase {
   }
 
   exec(url: string): Resp {
+    if (this.hasError()) return null;
+
     return this.handle(url);
   }
 }

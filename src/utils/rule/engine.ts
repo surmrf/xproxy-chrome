@@ -25,15 +25,49 @@ class RuleBase implements TRuleBase {
     try {
       this.ruleType = this.rule.type;
 
-      const pattern = this.rule.pattern.trim().replace(/(^\/|\/$)/gi, '');
-      this.patternRE = new RegExp(pattern, 'g');
+      const { str: pattern, flag: patternFlag } = this.trim(this.rule.pattern);
+      this.patternRE = new RegExp(pattern, patternFlag);
 
-      const condition = this.rule.condition.trim().replace(/(^\/|\/$)/gi, '');
-      this.conditionRE = new RegExp(condition, 'g');
+      const { str: condition, flag: conditionFlag } = this.trim(
+        this.rule.condition,
+      );
+      this.conditionRE = new RegExp(condition, conditionFlag);
     } catch (error) {
       console.error(error);
       this.error = true;
     }
+  }
+
+  trim(input: string): { str: string; flag: string } {
+    let output = input.trim();
+    let flag = '';
+
+    // trim start
+    if (/^\//.test(output)) {
+      output = output.replace(/^\//, '');
+    }
+
+    // trim end when input end with '/'
+    if (/\/$/.test(output)) {
+      output = output.replace(/\/$/, '');
+
+      return {
+        str: output,
+        flag,
+      };
+    }
+
+    // trim end when input end with '/i'、'/g'、'/gi'、'/ig'
+    const match = /(?:\/)(g|i|gi|ig)?$/gi.exec(output);
+    if (match && match[1]) {
+      output = output.replace(`/${match[1]}`, '');
+      flag = match[1].toLowerCase();
+    }
+
+    return {
+      str: output,
+      flag,
+    };
   }
 
   hasError(): boolean {

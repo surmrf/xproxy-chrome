@@ -163,9 +163,7 @@ class RuleEngine {
     this.ruleList = this.rules.map(rule => new RuleMatch(rule));
   }
 
-  match(
-    req: chrome.webRequest.ResourceRequest,
-  ): chrome.webRequest.BlockingResponse {
+  match(req: chrome.webRequest.ResourceRequest): Resp {
     const { url } = req;
 
     for (const rule of this.ruleList) {
@@ -175,7 +173,7 @@ class RuleEngine {
       }
     }
 
-    return {};
+    return null;
   }
 }
 

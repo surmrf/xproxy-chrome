@@ -8,6 +8,7 @@ export interface Rule {
 }
 
 export interface Group {
+  type: 'local' | 'remote';
   id: string;
   name: string;
   status: boolean;

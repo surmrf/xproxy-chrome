@@ -28,6 +28,7 @@ import {
   MoreVert as MoreVertIcon,
   StarBorder as StarBorderIcon,
   Star as StarIcon,
+  // FileCopy as FileCopyIcon,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import { defaultNSId } from '@/store';
@@ -226,7 +227,9 @@ const Row: React.FC<{
                 <TableCell>
                   <Link onClick={onEditGroup(group.id)}>{group.name}</Link>
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell>
+                  <div>{group.type}</div>
+                </TableCell>
                 <TableCell align="center">
                   <Switch
                     color="primary"
@@ -235,6 +238,11 @@ const Row: React.FC<{
                   />
                 </TableCell>
                 <TableCell align="right">
+                  {/* <Tooltip title="复制规则组">
+                    <IconButton className={classes.iconSpace}>
+                      <FileCopyIcon />
+                    </IconButton>
+                  </Tooltip> */}
                   <Tooltip title={group.star ? '取消收藏' : '收藏'}>
                     <IconButton
                       className={classes.iconSpace}

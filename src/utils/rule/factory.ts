@@ -15,6 +15,7 @@ export function createNamespace({
 
 export function createGroup({ name }: { name?: Group['name'] } = {}): Group {
   return {
+    type: 'local',
     id: uuid(),
     name: name || '',
     status: false,

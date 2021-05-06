@@ -33,6 +33,20 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  groupLeft: {
+    display: 'flex',
+    alignItems: 'center',
+  },
+  groupTag: {
+    color: '#0b52cb',
+    fontSize: '10px',
+    border: '1px solid #0b52cb',
+    borderRadius: '100%',
+    marginRight: '5px',
+    width: '12px',
+    textAlign: 'center',
+    height: '12px',
+  },
   groupName: {
     color: '#0b52cb',
     cursor: 'pointer',
@@ -110,11 +124,19 @@ const App: React.FC = () => {
           groups.map(group => {
             return (
               <div className={classes.groupRow} key={group.id}>
-                <div
-                  onClick={onGroupEdit({ nsId: group.nsId, groupId: group.id })}
-                  className={classes.groupName}
-                >
-                  {group.name}
+                <div className={classes.groupLeft}>
+                  <span className={classes.groupTag}>
+                    {group.type === 'remote' ? 'R' : 'L'}
+                  </span>
+                  <span
+                    className={classes.groupName}
+                    onClick={onGroupEdit({
+                      nsId: group.nsId,
+                      groupId: group.id,
+                    })}
+                  >
+                    {group.name}
+                  </span>
                 </div>
                 <div className={classes.groupSwitch}>
                   <Switch

@@ -15,7 +15,7 @@ class Store extends EE<'change'> {
   async set(key: string, value: any): Promise<void> {
     return new Promise(resolve => {
       console.info('set', key, value);
-      chrome.storage.local.set(
+      chrome.storage.sync.set(
         {
           [key]: value,
         },
@@ -26,7 +26,7 @@ class Store extends EE<'change'> {
 
   async get(key: string, defaultValue?: any): Promise<{ [key: string]: any }> {
     return new Promise(resolve => {
-      chrome.storage.local.get([key], value => {
+      chrome.storage.sync.get([key], value => {
         console.info('get', key, value[key]);
         resolve(value[key] || defaultValue);
       });
@@ -35,7 +35,7 @@ class Store extends EE<'change'> {
 
   async clear(): Promise<void> {
     return new Promise(resolve => {
-      chrome.storage.local.clear(resolve);
+      chrome.storage.sync.clear(resolve);
     });
   }
 }

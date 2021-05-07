@@ -1,6 +1,6 @@
 {
   "name": "proxy",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
@@ -57,6 +57,7 @@
     "add": "^2.0.6",
     "antd": "^4.12.2",
     "axios": "^0.21.1",
+    "classnames": "^2.3.1",
     "core-js": "3",
     "dayjs": "^1.10.4",
     "escape-string-regexp": "^4.0.0",

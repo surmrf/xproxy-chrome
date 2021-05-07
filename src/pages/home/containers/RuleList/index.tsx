@@ -32,11 +32,12 @@ import {
   DesktopWindows as DesktopWindowsIcon,
   CloudDownload as CloudDownloadIcon,
   Toc as TocIcon,
-  // FileCopy as FileCopyIcon,
+  FileCopy as FileCopyIcon,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { produce } from 'immer';
+import cx from 'classnames';
 import { defaultNSId } from '@/store';
 import { useGlobalStore } from '@/store/Provider';
 import { resetNSData } from '@/utils/rule/helper';
@@ -50,6 +51,9 @@ type DeleteType = 'group' | 'namespace';
 const useRowStyles = makeStyles({
   tableCell: {
     fontWeight: 600,
+  },
+  tableOptCell: {
+    width: '300px',
   },
   tableRow: {
     backgroundColor: '#fff',
@@ -155,6 +159,7 @@ const Row: React.FC<{
       type: 'changeNSName',
       payload: {
         nsId,
+        nsName: rowData.name,
       },
     });
   };
@@ -197,7 +202,10 @@ const Row: React.FC<{
             onChange={onNSChange(rowData.id)}
           />
         </TableCell>
-        <TableCell className={classes.tableCell} align="right">
+        <TableCell
+          className={cx(classes.tableCell, classes.tableOptCell)}
+          align="right"
+        >
           <Tooltip title="更多操作">
             <IconButton
               aria-label="more"
@@ -243,7 +251,7 @@ const Row: React.FC<{
           groups.map(group => {
             return (
               <TableRow key={group.id} className={classes.tableRow}>
-                <TableCell />
+                <TableCell className={classes.tableCell} />
                 <TableCell>
                   <Link onClick={onEditGroup(group.id)}>{group.name}</Link>
                 </TableCell>
@@ -257,12 +265,7 @@ const Row: React.FC<{
                     onChange={onGroupChange(rowData.id, group.id)}
                   />
                 </TableCell>
-                <TableCell align="right">
-                  {/* <Tooltip title="复制规则组">
-                    <IconButton className={classes.iconSpace}>
-                      <FileCopyIcon />
-                    </IconButton>
-                  </Tooltip> */}
+                <TableCell className={classes.tableOptCell} align="right">
                   <Tooltip title={group.star ? '取消收藏' : '收藏'}>
                     <IconButton
                       className={classes.iconSpace}
@@ -290,6 +293,11 @@ const Row: React.FC<{
                       }}
                     >
                       <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="复制规则组">
+                    <IconButton className={classes.iconSpace}>
+                      <FileCopyIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 </TableCell>
@@ -333,6 +341,9 @@ const useRuleListStyles = makeStyles({
     fontWeight: 100,
     fontSize: '12px',
   },
+  tableOptCell: {
+    width: '300px',
+  },
   noData: {
     padding: '20px 0',
     textAlign: 'center',
@@ -363,6 +374,11 @@ const RuleList: React.FC = () => {
       }
       return true;
     }) || [];
+
+  const onClose = () => {
+    setOpen(null);
+    setNSName('');
+  };
 
   const onSave = () => {
     if (!nsName) {
@@ -401,6 +417,7 @@ const RuleList: React.FC = () => {
     if (type === 'changeNSName') {
       setOpen('edit');
       setTemp(payload);
+      setNSName(payload.nsName);
     }
   };
 
@@ -489,7 +506,10 @@ const RuleList: React.FC = () => {
               <TableCell className={classes.tableCell} align="center">
                 开启状态
               </TableCell>
-              <TableCell className={classes.tableCell} align="right">
+              <TableCell
+                className={cx(classes.tableCell, classes.tableOptCell)}
+                align="right"
+              >
                 操作
               </TableCell>
             </TableRow>
@@ -513,11 +533,13 @@ const RuleList: React.FC = () => {
       <Dialog
         open={!!open}
         fullWidth
-        onClose={() => setOpen(null)}
+        onClose={onClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">添加空间</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {open === 'new' ? '添加空间' : '修改空间名'}
+        </DialogTitle>
         <DialogContent>
           <TextField
             className={classes.nsName}
@@ -531,7 +553,7 @@ const RuleList: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(null)} color="primary">
+          <Button onClick={onClose} color="primary">
             取消
           </Button>
           <Button onClick={onSave} color="primary" autoFocus>
@@ -541,7 +563,7 @@ const RuleList: React.FC = () => {
       </Dialog>
 
       <Dialog
-        open={!!importUrlOpen}
+        open={importUrlOpen}
         fullWidth
         onClose={() => setImportUrlOpen(false)}
         aria-labelledby="alert-dialog-title"
@@ -565,7 +587,7 @@ const RuleList: React.FC = () => {
             取消
           </Button>
           <Button onClick={onHttpImportNS} color="primary" autoFocus>
-            保存
+            导入
           </Button>
         </DialogActions>
       </Dialog>

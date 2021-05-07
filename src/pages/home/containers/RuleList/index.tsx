@@ -155,6 +155,7 @@ const Row: React.FC<{
       type: 'changeNSName',
       payload: {
         nsId,
+        nsName: rowData.name,
       },
     });
   };
@@ -364,6 +365,11 @@ const RuleList: React.FC = () => {
       return true;
     }) || [];
 
+  const onClose = () => {
+    setOpen(null);
+    setNSName('');
+  };
+
   const onSave = () => {
     if (!nsName) {
       toast.error('请填写空间名');
@@ -401,6 +407,7 @@ const RuleList: React.FC = () => {
     if (type === 'changeNSName') {
       setOpen('edit');
       setTemp(payload);
+      setNSName(payload.nsName);
     }
   };
 
@@ -513,11 +520,13 @@ const RuleList: React.FC = () => {
       <Dialog
         open={!!open}
         fullWidth
-        onClose={() => setOpen(null)}
+        onClose={onClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">添加空间</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {open === 'new' ? '添加空间' : '修改空间名'}
+        </DialogTitle>
         <DialogContent>
           <TextField
             className={classes.nsName}
@@ -531,7 +540,7 @@ const RuleList: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(null)} color="primary">
+          <Button onClick={onClose} color="primary">
             取消
           </Button>
           <Button onClick={onSave} color="primary" autoFocus>

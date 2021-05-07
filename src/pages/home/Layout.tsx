@@ -13,7 +13,6 @@ import {
   Container,
   Grid,
   Paper,
-  Link,
 } from '@material-ui/core';
 import {
   Menu as MenuIcon,
@@ -26,10 +25,7 @@ const Copyright = () => {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Proxy
-      </Link>{' '}
-      {new Date().getFullYear()}
+      Proxy {new Date().getFullYear()}
       {'.'}
     </Typography>
   );

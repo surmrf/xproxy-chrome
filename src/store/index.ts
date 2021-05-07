@@ -34,10 +34,8 @@ export const defaultNSId = '__default__';
 export const defaultNSName = 'Untitled Group';
 
 const reducer = (draft: State, action: DispatchAction) => {
-  const { type, payload } = action;
-
-  const initState = () => {
-    let initData: State = payload;
+  const initState = data => {
+    let initData: State = data;
     if (!initData || !initData.namespaces.length) {
       initData = {
         namespaces: [
@@ -51,15 +49,19 @@ const reducer = (draft: State, action: DispatchAction) => {
     draft = initData;
   };
 
-  const addNS = () => {
+  const addNS = ({ name, ns }: { name?: string; ns?: Namespace }) => {
     if (!draft.namespaces) {
       draft.namespaces = [];
     }
-    draft.namespaces.push(
-      createNamespace({
-        name: payload.name,
-      }),
-    );
+    if (ns && !name) {
+      draft.namespaces.push(ns);
+    } else {
+      draft.namespaces.push(
+        createNamespace({
+          name,
+        }),
+      );
+    }
   };
 
   const deleteNS = ({ nsId }: { nsId: string }) => {
@@ -166,6 +168,7 @@ const reducer = (draft: State, action: DispatchAction) => {
     groupSwitch,
   };
 
+  const { type, payload } = action;
   if (ops[type]) {
     ops[type](payload);
   }

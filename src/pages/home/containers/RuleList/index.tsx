@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Button,
+  ButtonGroup,
   Table,
   TableHead,
   TableBody,
@@ -28,14 +29,21 @@ import {
   MoreVert as MoreVertIcon,
   StarBorder as StarBorderIcon,
   Star as StarIcon,
+  DesktopWindows as DesktopWindowsIcon,
+  CloudDownload as CloudDownloadIcon,
+  Toc as TocIcon,
   // FileCopy as FileCopyIcon,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
+import dayjs from 'dayjs';
+import { produce } from 'immer';
 import { defaultNSId } from '@/store';
 import { useGlobalStore } from '@/store/Provider';
+import { resetNSData } from '@/utils/rule/helper';
 import { Namespace, Group } from '@/utils/rule/type';
 import Header from '../../components/Header';
 import toast from '../../components/toast';
+import { loadJSONFile, exportJSONFile, loadRemoteJSON } from './util';
 
 type DeleteType = 'group' | 'namespace';
 
@@ -151,6 +159,17 @@ const Row: React.FC<{
     });
   };
 
+  const onExportNSData = () => {
+    const filename = `${rowData.name}-${dayjs().format('YYYY-MM-DD')}`;
+
+    exportJSONFile(
+      produce(rowData, draft => {
+        draft.name = filename;
+      }),
+      filename,
+    );
+  };
+
   return (
     <React.Fragment>
       <TableRow>
@@ -202,6 +221,7 @@ const Row: React.FC<{
           >
             <MenuItem onClick={onAddRuleGroup}>新建规则组</MenuItem>
             <MenuItem onClick={onChangeNSName}>更改空间名</MenuItem>
+            <MenuItem onClick={onExportNSData}>导出空间</MenuItem>
             {nsId !== defaultNSId && (
               <MenuItem
                 onClick={() => {
@@ -329,6 +349,8 @@ const RuleList: React.FC = () => {
   const [open, setOpen] = useState<'new' | 'edit' | null>();
   const [nsName, setNSName] = useState('');
   const [temp, setTemp] = useState(null);
+  const [importUrl, setImportUrl] = useState('');
+  const [importUrlOpen, setImportUrlOpen] = useState(false);
 
   const { state } = store;
   const namespaces =
@@ -382,6 +404,38 @@ const RuleList: React.FC = () => {
     }
   };
 
+  const okHandle = (type: 'local' | 'remote' = 'local') => json => {
+    const ns = resetNSData(json, type);
+
+    if (!ns) {
+      toast.error('配置数据格式错误');
+      return;
+    }
+
+    dispatch({
+      type: 'addNS',
+      payload: {
+        ns,
+      },
+    });
+  };
+
+  const errHandle = msg => {
+    toast.error(msg);
+  };
+
+  const onImportNS = () => {
+    loadJSONFile().then(okHandle('local'), errHandle);
+  };
+
+  const onHttpImportNS = () => {
+    loadRemoteJSON(importUrl)
+      .then(okHandle('remote'), errHandle)
+      .then(() => {
+        setImportUrlOpen(false);
+      });
+  };
+
   return (
     <div className={classes.ruleList}>
       <Header title="规则管理">
@@ -396,11 +450,33 @@ const RuleList: React.FC = () => {
         <Button
           variant="contained"
           color="primary"
-          startIcon={<AddIcon />}
+          startIcon={<TocIcon />}
           onClick={onCreateGroup}
         >
-          新建规则组
+          新增规则组
         </Button>
+        <ButtonGroup disableElevation variant="contained" color="primary">
+          <Tooltip title="本地导入">
+            <Button
+              size="large"
+              variant="contained"
+              color="primary"
+              onClick={onImportNS}
+            >
+              <DesktopWindowsIcon fontSize="small" />
+            </Button>
+          </Tooltip>
+          <Tooltip title="远程导入">
+            <Button
+              size="large"
+              variant="contained"
+              color="primary"
+              onClick={() => setImportUrlOpen(true)}
+            >
+              <CloudDownloadIcon fontSize="small" />
+            </Button>
+          </Tooltip>
+        </ButtonGroup>
         {/* <MoreVertIcon /> */}
       </Header>
       <div className={classes.tableContainer}>
@@ -459,6 +535,36 @@ const RuleList: React.FC = () => {
             取消
           </Button>
           <Button onClick={onSave} color="primary" autoFocus>
+            保存
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={!!importUrlOpen}
+        fullWidth
+        onClose={() => setImportUrlOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">远程导入空间</DialogTitle>
+        <DialogContent>
+          <TextField
+            className={classes.nsName}
+            size="small"
+            label="远程地址"
+            variant="outlined"
+            value={importUrl}
+            onChange={evt => {
+              setImportUrl(evt.target.value);
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setImportUrlOpen(false)} color="primary">
+            取消
+          </Button>
+          <Button onClick={onHttpImportNS} color="primary" autoFocus>
             保存
           </Button>
         </DialogActions>

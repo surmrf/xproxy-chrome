@@ -18,7 +18,6 @@
     "@babel/preset-react": "^7.12.13",
     "@babel/preset-typescript": "^7.12.13",
     "@babel/runtime": "^7.12.18",
-    "@types/axios": "^0.14.0",
     "@types/chrome": "^0.0.129",
     "@types/lodash-es": "^4.17.4",
     "@types/react": "^17.0.1",

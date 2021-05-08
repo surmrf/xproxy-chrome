@@ -73,6 +73,7 @@ const useRowStyles = makeStyles({
 const Row: React.FC<{
   rowData: Namespace;
   onChange?: (args: { type: 'changeNSName'; payload: any }) => void;
+  onUpdateRemoteNS?: (args: Namespace) => void;
 }> = props => {
   const { rowData } = props;
   const [open, setOpen] = useState(false);
@@ -175,6 +176,10 @@ const Row: React.FC<{
     );
   };
 
+  const onUpdateNSData = () => {
+    props.onUpdateRemoteNS(rowData);
+  };
+
   return (
     <React.Fragment>
       <TableRow>
@@ -230,7 +235,10 @@ const Row: React.FC<{
             <MenuItem onClick={onAddRuleGroup}>新建规则组</MenuItem>
             <MenuItem onClick={onChangeNSName}>更改空间名</MenuItem>
             <MenuItem onClick={onExportNSData}>导出空间</MenuItem>
-            {nsId !== defaultNSId && (
+            {rowData?.remoteUrl ? (
+              <MenuItem onClick={onUpdateNSData}>更新空间</MenuItem>
+            ) : null}
+            {nsId !== defaultNSId ? (
               <MenuItem
                 onClick={() => {
                   deleteStagedInfo.current = {
@@ -240,9 +248,9 @@ const Row: React.FC<{
                   setOpenDialog(true);
                 }}
               >
-                删除
+                删除空间
               </MenuItem>
-            )}
+            ) : null}
           </Menu>
         </TableCell>
       </TableRow>
@@ -421,8 +429,25 @@ const RuleList: React.FC = () => {
     }
   };
 
-  const okHandle = (type: 'local' | 'remote' = 'local') => json => {
-    const ns = resetNSData(json, type);
+  const okHandle = (
+    type: 'local' | 'remote',
+    opt: 'new' | 'update' = 'new',
+    extra?: { nsId?: string; remoteUrl?: string },
+  ) => json => {
+    const ns = resetNSData(json, {
+      onNSChange: ns => {
+        if (type === 'remote') {
+          ns.remoteUrl = extra.remoteUrl;
+
+          if (opt === 'update') {
+            //
+          }
+        }
+      },
+      onGroupChange: group => {
+        group.type = type;
+      },
+    });
 
     if (!ns) {
       toast.error('配置数据格式错误');
@@ -441,16 +466,23 @@ const RuleList: React.FC = () => {
     toast.error(msg);
   };
 
-  const onImportNS = () => {
-    loadJSONFile().then(okHandle('local'), errHandle);
+  const onImportLocalNS = () => {
+    loadJSONFile().then(okHandle('local', 'new'), errHandle);
   };
 
-  const onHttpImportNS = () => {
+  const onImportRemoteNS = () => {
     loadRemoteJSON(importUrl)
-      .then(okHandle('remote'), errHandle)
+      .then(okHandle('remote', 'new', { remoteUrl: importUrl }), errHandle)
       .then(() => {
         setImportUrlOpen(false);
       });
+  };
+
+  const onUpdateRemoteNS = ({ id, remoteUrl }: Namespace) => {
+    loadRemoteJSON(remoteUrl).then(
+      okHandle('remote', 'update', { nsId: id, remoteUrl }),
+      errHandle,
+    );
   };
 
   return (
@@ -478,7 +510,7 @@ const RuleList: React.FC = () => {
               size="large"
               variant="contained"
               color="primary"
-              onClick={onImportNS}
+              onClick={onImportLocalNS}
             >
               <DesktopWindowsIcon fontSize="small" />
             </Button>
@@ -517,7 +549,12 @@ const RuleList: React.FC = () => {
           <TableBody>
             {namespaces.length ? (
               namespaces.map(ns => (
-                <Row key={ns.id} rowData={ns} onChange={onRowChange} />
+                <Row
+                  key={ns.id}
+                  rowData={ns}
+                  onChange={onRowChange}
+                  onUpdateRemoteNS={onUpdateRemoteNS}
+                />
               ))
             ) : (
               <TableRow>
@@ -586,7 +623,7 @@ const RuleList: React.FC = () => {
           <Button onClick={() => setImportUrlOpen(false)} color="primary">
             取消
           </Button>
-          <Button onClick={onHttpImportNS} color="primary" autoFocus>
+          <Button onClick={onImportRemoteNS} color="primary" autoFocus>
             导入
           </Button>
         </DialogActions>

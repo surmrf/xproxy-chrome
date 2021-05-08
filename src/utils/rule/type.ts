@@ -8,7 +8,6 @@ export interface Rule {
 }
 
 export interface Group {
-  type: 'local' | 'remote';
   id: string;
   name: string;
   status: boolean;
@@ -18,6 +17,7 @@ export interface Group {
 }
 
 export interface Namespace {
+  type: 'local' | 'remote';
   id: string;
   name: string;
   status: boolean;

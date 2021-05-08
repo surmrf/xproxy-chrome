@@ -1,4 +1,4 @@
-import { find } from 'lodash-es';
+import { find, findIndex } from 'lodash-es';
 import { Dispatch, useMemo } from 'react';
 import { useImmerReducer } from 'use-immer';
 import { createNamespace } from '@/utils/rule/factory';
@@ -11,6 +11,7 @@ export type DispatchType =
   | 'initState'
   | 'addNS'
   | 'deleteNS'
+  | 'replaceNS'
   | 'changeNSName'
   | 'addGroup'
   | 'starGroup'
@@ -66,6 +67,11 @@ const reducer = (draft: State, action: DispatchAction) => {
 
   const deleteNS = ({ nsId }: { nsId: string }) => {
     draft.namespaces = draft.namespaces.filter(ns => ns.id !== nsId);
+  };
+
+  const replaceNS = ({ nsId, ns }: { nsId: string; ns: Namespace }) => {
+    const idx = findIndex(draft.namespaces, ns => ns.id === nsId);
+    draft.namespaces.splice(idx, 1, ns);
   };
 
   const changeNSName = ({ nsId, name }) => {
@@ -160,6 +166,7 @@ const reducer = (draft: State, action: DispatchAction) => {
     initState,
     addNS,
     deleteNS,
+    replaceNS,
     changeNSName,
     addGroup,
     starGroup,

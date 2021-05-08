@@ -192,14 +192,10 @@ const Row: React.FC<{
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell
-          className={classes.tableCell}
-          width="40%"
-          component="th"
-          colSpan={2}
-        >
+        <TableCell className={classes.tableCell} width="40%" component="th">
           {rowData.name}
         </TableCell>
+        <TableCell>{rowData.type}</TableCell>
         <TableCell className={classes.tableCell} align="center">
           <Switch
             color="primary"
@@ -263,9 +259,7 @@ const Row: React.FC<{
                 <TableCell>
                   <Link onClick={onEditGroup(group.id)}>{group.name}</Link>
                 </TableCell>
-                <TableCell>
-                  <div>{group.type}</div>
-                </TableCell>
+                <TableCell />
                 <TableCell align="center">
                   <Switch
                     color="primary"
@@ -438,14 +432,8 @@ const RuleList: React.FC = () => {
       onNSChange: ns => {
         if (type === 'remote') {
           ns.remoteUrl = extra.remoteUrl;
-
-          if (opt === 'update') {
-            //
-          }
         }
-      },
-      onGroupChange: group => {
-        group.type = type;
+        ns.type = type;
       },
     });
 
@@ -454,16 +442,26 @@ const RuleList: React.FC = () => {
       return;
     }
 
-    dispatch({
-      type: 'addNS',
-      payload: {
-        ns,
-      },
-    });
+    if (opt === 'new') {
+      dispatch({
+        type: 'addNS',
+        payload: {
+          ns,
+        },
+      });
+    } else {
+      dispatch({
+        type: 'replaceNS',
+        payload: {
+          nsId: extra.nsId,
+          ns,
+        },
+      });
+    }
   };
 
   const errHandle = msg => {
-    toast.error(msg);
+    toast.error(msg?.message);
   };
 
   const onImportLocalNS = () => {
@@ -526,7 +524,6 @@ const RuleList: React.FC = () => {
             </Button>
           </Tooltip>
         </ButtonGroup>
-        {/* <MoreVertIcon /> */}
       </Header>
       <div className={classes.tableContainer}>
         <Table className={classes.table} aria-label="collapsible table">

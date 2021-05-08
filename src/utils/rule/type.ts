@@ -22,4 +22,5 @@ export interface Namespace {
   name: string;
   status: boolean;
   groups: Group[];
+  remoteUrl?: string;
 }

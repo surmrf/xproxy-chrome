@@ -14,7 +14,14 @@ export function isRule(rule: Rule) {
   return !!rule.pattern;
 }
 
-export function resetNSData(ns: Namespace, type: Group['type']) {
+export function resetNSData(
+  ns: Namespace,
+  cb?: {
+    onNSChange?: (ns: Namespace) => void;
+    onGroupChange?: (ns: Group) => void;
+    onRuleChange?: (ns: Rule) => void;
+  },
+) {
   if (!isNs(ns)) return null;
 
   return produce(ns, draft => {
@@ -22,15 +29,20 @@ export function resetNSData(ns: Namespace, type: Group['type']) {
     draft.status = false;
     draft.groups = draft.groups || [];
 
+    cb?.onNSChange?.(draft);
+
     draft.groups.forEach(group => {
       group.id = uuid();
       group.status = false;
       group.star = false;
-      group.type = type;
+
+      cb?.onGroupChange?.(group);
 
       group.rules = group.rules || [];
       group.rules.forEach(rule => {
         rule.id = uuid();
+
+        cb?.onRuleChange?.(rule);
       });
     });
   });

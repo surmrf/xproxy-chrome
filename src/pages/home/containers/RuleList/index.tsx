@@ -32,7 +32,7 @@ import {
   DesktopWindows as DesktopWindowsIcon,
   CloudDownload as CloudDownloadIcon,
   Toc as TocIcon,
-  FileCopy as FileCopyIcon,
+  // FileCopy as FileCopyIcon,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -297,11 +297,11 @@ const Row: React.FC<{
                       <DeleteIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="复制规则组">
+                  {/* <Tooltip title="复制规则组">
                     <IconButton className={classes.iconSpace}>
                       <FileCopyIcon fontSize="small" />
                     </IconButton>
-                  </Tooltip>
+                  </Tooltip> */}
                 </TableCell>
               </TableRow>
             );

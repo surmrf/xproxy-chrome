@@ -155,6 +155,7 @@ const Row: React.FC<{
       type: 'changeNSName',
       payload: {
         nsId,
+        nsName: rowData.name,
       },
     });
   };
@@ -364,6 +365,11 @@ const RuleList: React.FC = () => {
       return true;
     }) || [];
 
+  const onClose = () => {
+    setOpen(null);
+    setNSName('');
+  };
+
   const onSave = () => {
     if (!nsName) {
       toast.error('请填写空间名');
@@ -401,7 +407,40 @@ const RuleList: React.FC = () => {
     if (type === 'changeNSName') {
       setOpen('edit');
       setTemp(payload);
+      setNSName(payload.nsName);
     }
+  };
+
+  const okHandle = (type: 'local' | 'remote' = 'local') => json => {
+    const ns = resetNSData(json, type);
+
+    if (!ns) {
+      toast.error('配置数据格式错误');
+      return;
+    }
+
+    dispatch({
+      type: 'addNS',
+      payload: {
+        ns,
+      },
+    });
+  };
+
+  const errHandle = msg => {
+    toast.error(msg);
+  };
+
+  const onImportNS = () => {
+    loadJSONFile().then(okHandle('local'), errHandle);
+  };
+
+  const onHttpImportNS = () => {
+    loadRemoteJSON(importUrl)
+      .then(okHandle('remote'), errHandle)
+      .then(() => {
+        setImportUrlOpen(false);
+      });
   };
 
   const okHandle = (type: 'local' | 'remote' = 'local') => json => {
@@ -513,11 +552,13 @@ const RuleList: React.FC = () => {
       <Dialog
         open={!!open}
         fullWidth
-        onClose={() => setOpen(null)}
+        onClose={onClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">添加空间</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {open === 'new' ? '添加空间' : '修改空间名'}
+        </DialogTitle>
         <DialogContent>
           <TextField
             className={classes.nsName}
@@ -531,7 +572,7 @@ const RuleList: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(null)} color="primary">
+          <Button onClick={onClose} color="primary">
             取消
           </Button>
           <Button onClick={onSave} color="primary" autoFocus>

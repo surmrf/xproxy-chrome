@@ -6,6 +6,7 @@ export function createNamespace({
   name,
 }: { id?: Namespace['id']; name?: Namespace['name'] } = {}): Namespace {
   return {
+    type: 'local',
     id: id || uuid(),
     name: name || '',
     status: false,
@@ -15,7 +16,6 @@ export function createNamespace({
 
 export function createGroup({ name }: { name?: Group['name'] } = {}): Group {
   return {
-    type: 'local',
     id: uuid(),
     name: name || '',
     status: false,

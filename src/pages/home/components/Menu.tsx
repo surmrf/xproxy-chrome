@@ -1,6 +1,12 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
+import {
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Link,
+} from '@material-ui/core';
 import {
   Dashboard as DashboardIcon,
   BugReport as BugReportIcon,
@@ -18,18 +24,32 @@ const Menu: React.FC = () => {
         </ListItemIcon>
         <ListItemText primary="规则" />
       </ListItem>
-      <ListItem button selected={pathname === '/doc'}>
-        <ListItemIcon>
-          <DescriptionIcon color="action" />
-        </ListItemIcon>
-        <ListItemText primary="文档" />
-      </ListItem>
-      <ListItem button selected={pathname === '/issue'}>
-        <ListItemIcon>
-          <BugReportIcon color="action" />
-        </ListItemIcon>
-        <ListItemText primary="问题" />
-      </ListItem>
+      <Link
+        color="inherit"
+        underline="none"
+        target="_blank"
+        href="https://www.yuque.com/ryl2nr/ngd5zk"
+      >
+        <ListItem button selected={pathname === '/doc'}>
+          <ListItemIcon>
+            <DescriptionIcon color="action" />
+          </ListItemIcon>
+          <ListItemText primary="文档" />
+        </ListItem>
+      </Link>
+      <Link
+        color="inherit"
+        underline="none"
+        target="_blank"
+        href="https://www.yuque.com/ryl2nr/topics"
+      >
+        <ListItem button selected={pathname === '/issue'}>
+          <ListItemIcon>
+            <BugReportIcon color="action" />
+          </ListItemIcon>
+          <ListItemText primary="问题" />
+        </ListItem>
+      </Link>
     </List>
   );
 };

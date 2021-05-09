@@ -30,7 +30,7 @@ import {
   StarBorder as StarBorderIcon,
   Star as StarIcon,
   DesktopWindows as DesktopWindowsIcon,
-  CloudDownload as CloudDownloadIcon,
+  CloudDownloadOutlined as CloudDownloadIcon,
   Toc as TocIcon,
   // FileCopy as FileCopyIcon,
 } from '@material-ui/icons';
@@ -45,6 +45,7 @@ import { Namespace, Group } from '@/utils/rule/type';
 import Header from '../../components/Header';
 import toast from '../../components/toast';
 import { loadJSONFile, exportJSONFile, loadRemoteJSON } from './util';
+import MoreButton from './components/MoreButton';
 
 type DeleteType = 'group' | 'namespace';
 
@@ -57,6 +58,9 @@ const useRowStyles = makeStyles({
   },
   tableRow: {
     backgroundColor: '#fff',
+  },
+  nsTypeIcon: {
+    verticalAlign: 'middle',
   },
   iconSpace: {
     marginRight: '10px',
@@ -195,7 +199,16 @@ const Row: React.FC<{
         <TableCell className={classes.tableCell} width="40%" component="th">
           {rowData.name}
         </TableCell>
-        <TableCell>{rowData.type}</TableCell>
+        <TableCell>
+          {rowData.type === 'local' ? (
+            <DesktopWindowsIcon
+              className={classes.nsTypeIcon}
+              fontSize="small"
+            />
+          ) : (
+            <CloudDownloadIcon className={classes.nsTypeIcon} />
+          )}
+        </TableCell>
         <TableCell className={classes.tableCell} align="center">
           <Switch
             color="primary"
@@ -438,8 +451,7 @@ const RuleList: React.FC = () => {
     });
 
     if (!ns) {
-      toast.error('配置数据格式错误');
-      return;
+      throw new Error('配置数据格式错误');
     }
 
     if (opt === 'new') {
@@ -465,22 +477,31 @@ const RuleList: React.FC = () => {
   };
 
   const onImportLocalNS = () => {
-    loadJSONFile().then(okHandle('local', 'new'), errHandle);
+    loadJSONFile()
+      .then(okHandle('local', 'new'))
+      .then(() => {
+        toast.success('导入成功');
+      })
+      .catch(errHandle);
   };
 
   const onImportRemoteNS = () => {
     loadRemoteJSON(importUrl)
-      .then(okHandle('remote', 'new', { remoteUrl: importUrl }), errHandle)
+      .then(okHandle('remote', 'new', { remoteUrl: importUrl }))
       .then(() => {
+        toast.success('导入成功');
         setImportUrlOpen(false);
-      });
+      })
+      .catch(errHandle);
   };
 
   const onUpdateRemoteNS = ({ id, remoteUrl }: Namespace) => {
-    loadRemoteJSON(remoteUrl).then(
-      okHandle('remote', 'update', { nsId: id, remoteUrl }),
-      errHandle,
-    );
+    loadRemoteJSON(remoteUrl)
+      .then(okHandle('remote', 'update', { nsId: id, remoteUrl }), errHandle)
+      .then(() => {
+        toast.success('更新成功');
+      })
+      .catch(errHandle);
   };
 
   return (
@@ -524,6 +545,7 @@ const RuleList: React.FC = () => {
             </Button>
           </Tooltip>
         </ButtonGroup>
+        <MoreButton />
       </Header>
       <div className={classes.tableContainer}>
         <Table className={classes.table} aria-label="collapsible table">

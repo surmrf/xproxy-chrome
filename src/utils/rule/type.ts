@@ -17,7 +17,7 @@ export interface Group {
 }
 
 export interface Namespace {
-  type: 'local' | 'remote';
+  type?: 'local' | 'remote';
   id: string;
   name: string;
   status: boolean;

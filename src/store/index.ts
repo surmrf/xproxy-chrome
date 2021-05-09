@@ -12,6 +12,7 @@ export type DispatchType =
   | 'addNS'
   | 'deleteNS'
   | 'replaceNS'
+  | 'clearNS'
   | 'changeNSName'
   | 'addGroup'
   | 'starGroup'
@@ -72,6 +73,16 @@ const reducer = (draft: State, action: DispatchAction) => {
   const replaceNS = ({ nsId, ns }: { nsId: string; ns: Namespace }) => {
     const idx = findIndex(draft.namespaces, ns => ns.id === nsId);
     draft.namespaces.splice(idx, 1, ns);
+  };
+
+  const clearNS = () => {
+    draft.namespaces.forEach(ns => {
+      if (ns.id === defaultNSId) {
+        ns.groups = [];
+        ns.status = false;
+      }
+    });
+    draft.namespaces = draft.namespaces.filter(ns => ns.id === defaultNSId);
   };
 
   const changeNSName = ({ nsId, name }) => {
@@ -167,6 +178,7 @@ const reducer = (draft: State, action: DispatchAction) => {
     addNS,
     deleteNS,
     replaceNS,
+    clearNS,
     changeNSName,
     addGroup,
     starGroup,

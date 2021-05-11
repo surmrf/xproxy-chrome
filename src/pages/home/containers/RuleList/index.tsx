@@ -35,7 +35,7 @@ import {
   // FileCopy as FileCopyIcon,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
-import dayjs from 'dayjs';
+// import dayjs from 'dayjs';
 import { produce } from 'immer';
 import cx from 'classnames';
 import { defaultNSId } from '@/store';
@@ -170,7 +170,7 @@ const Row: React.FC<{
   };
 
   const onExportNSData = () => {
-    const filename = `${rowData.name}-${dayjs().format('YYYY-MM-DD')}`;
+    const filename = rowData.name;
 
     exportJSONFile(
       produce(rowData, draft => {

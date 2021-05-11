@@ -43,7 +43,12 @@ export function exportJSONFile(rowData: any, filename: string) {
 }
 
 export async function loadRemoteJSON(url: string) {
-  return axios.get(url).then(res => {
-    return res.data;
-  });
+  return axios
+    .get(url)
+    .then(res => {
+      return res.data;
+    })
+    .catch(() => {
+      throw new Error('远程导入异常');
+    });
 }

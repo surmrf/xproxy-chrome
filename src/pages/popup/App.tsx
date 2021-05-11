@@ -5,7 +5,7 @@ import { Group } from '@/store';
 import Provider, { useGlobalStore } from '@/store/Provider';
 import Logo from '@/common/Logo';
 
-type NewGroup = Group & { nsId: string };
+type NewGroup = Group & { nsId: string; nsType: 'local' | 'remote' };
 
 const useStyles = makeStyles({
   popupContainer: {
@@ -77,7 +77,11 @@ const App: React.FC = () => {
     if (!state.namespaces) return [];
     return state.namespaces
       .reduce<NewGroup[]>((a, b) => {
-        const groups = b.groups.map(group => ({ ...group, nsId: b.id }));
+        const groups = b.groups.map(group => ({
+          ...group,
+          nsId: b.id,
+          nsType: b.type,
+        }));
         return [...a.concat(...groups)];
       }, [])
       .filter(group => group.star);
@@ -126,7 +130,7 @@ const App: React.FC = () => {
               <div className={classes.groupRow} key={group.id}>
                 <div className={classes.groupLeft}>
                   <span className={classes.groupTag}>
-                    {group.type === 'remote' ? 'R' : 'L'}
+                    {group.nsType === 'remote' ? 'R' : 'L'}
                   </span>
                   <span
                     className={classes.groupName}

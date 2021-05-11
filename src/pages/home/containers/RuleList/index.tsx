@@ -30,13 +30,14 @@ import {
   StarBorder as StarBorderIcon,
   Star as StarIcon,
   DesktopWindows as DesktopWindowsIcon,
-  CloudDownload as CloudDownloadIcon,
+  CloudDownloadOutlined as CloudDownloadIcon,
   Toc as TocIcon,
   // FileCopy as FileCopyIcon,
 } from '@material-ui/icons';
 import { useHistory } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { produce } from 'immer';
+import cx from 'classnames';
 import { defaultNSId } from '@/store';
 import { useGlobalStore } from '@/store/Provider';
 import { resetNSData } from '@/utils/rule/helper';
@@ -44,6 +45,7 @@ import { Namespace, Group } from '@/utils/rule/type';
 import Header from '../../components/Header';
 import toast from '../../components/toast';
 import { loadJSONFile, exportJSONFile, loadRemoteJSON } from './util';
+import MoreButton from './components/MoreButton';
 
 type DeleteType = 'group' | 'namespace';
 
@@ -51,8 +53,14 @@ const useRowStyles = makeStyles({
   tableCell: {
     fontWeight: 600,
   },
+  tableOptCell: {
+    width: '300px',
+  },
   tableRow: {
     backgroundColor: '#fff',
+  },
+  nsTypeIcon: {
+    verticalAlign: 'middle',
   },
   iconSpace: {
     marginRight: '10px',
@@ -69,6 +77,7 @@ const useRowStyles = makeStyles({
 const Row: React.FC<{
   rowData: Namespace;
   onChange?: (args: { type: 'changeNSName'; payload: any }) => void;
+  onUpdateRemoteNS?: (args: Namespace) => void;
 }> = props => {
   const { rowData } = props;
   const [open, setOpen] = useState(false);
@@ -171,6 +180,10 @@ const Row: React.FC<{
     );
   };
 
+  const onUpdateNSData = () => {
+    props.onUpdateRemoteNS(rowData);
+  };
+
   return (
     <React.Fragment>
       <TableRow>
@@ -183,13 +196,18 @@ const Row: React.FC<{
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell
-          className={classes.tableCell}
-          width="40%"
-          component="th"
-          colSpan={2}
-        >
+        <TableCell className={classes.tableCell} width="40%" component="th">
           {rowData.name}
+        </TableCell>
+        <TableCell>
+          {rowData.type === 'local' ? (
+            <DesktopWindowsIcon
+              className={classes.nsTypeIcon}
+              fontSize="small"
+            />
+          ) : (
+            <CloudDownloadIcon className={classes.nsTypeIcon} />
+          )}
         </TableCell>
         <TableCell className={classes.tableCell} align="center">
           <Switch
@@ -198,7 +216,10 @@ const Row: React.FC<{
             onChange={onNSChange(rowData.id)}
           />
         </TableCell>
-        <TableCell className={classes.tableCell} align="right">
+        <TableCell
+          className={cx(classes.tableCell, classes.tableOptCell)}
+          align="right"
+        >
           <Tooltip title="更多操作">
             <IconButton
               aria-label="more"
@@ -223,7 +244,10 @@ const Row: React.FC<{
             <MenuItem onClick={onAddRuleGroup}>新建规则组</MenuItem>
             <MenuItem onClick={onChangeNSName}>更改空间名</MenuItem>
             <MenuItem onClick={onExportNSData}>导出空间</MenuItem>
-            {nsId !== defaultNSId && (
+            {rowData?.remoteUrl ? (
+              <MenuItem onClick={onUpdateNSData}>更新空间</MenuItem>
+            ) : null}
+            {nsId !== defaultNSId ? (
               <MenuItem
                 onClick={() => {
                   deleteStagedInfo.current = {
@@ -233,9 +257,9 @@ const Row: React.FC<{
                   setOpenDialog(true);
                 }}
               >
-                删除
+                删除空间
               </MenuItem>
-            )}
+            ) : null}
           </Menu>
         </TableCell>
       </TableRow>
@@ -244,13 +268,11 @@ const Row: React.FC<{
           groups.map(group => {
             return (
               <TableRow key={group.id} className={classes.tableRow}>
-                <TableCell />
+                <TableCell className={classes.tableCell} />
                 <TableCell>
                   <Link onClick={onEditGroup(group.id)}>{group.name}</Link>
                 </TableCell>
-                <TableCell>
-                  <div>{group.type}</div>
-                </TableCell>
+                <TableCell />
                 <TableCell align="center">
                   <Switch
                     color="primary"
@@ -258,12 +280,7 @@ const Row: React.FC<{
                     onChange={onGroupChange(rowData.id, group.id)}
                   />
                 </TableCell>
-                <TableCell align="right">
-                  {/* <Tooltip title="复制规则组">
-                    <IconButton className={classes.iconSpace}>
-                      <FileCopyIcon />
-                    </IconButton>
-                  </Tooltip> */}
+                <TableCell className={classes.tableOptCell} align="right">
                   <Tooltip title={group.star ? '取消收藏' : '收藏'}>
                     <IconButton
                       className={classes.iconSpace}
@@ -293,6 +310,11 @@ const Row: React.FC<{
                       <DeleteIcon />
                     </IconButton>
                   </Tooltip>
+                  {/* <Tooltip title="复制规则组">
+                    <IconButton className={classes.iconSpace}>
+                      <FileCopyIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip> */}
                 </TableCell>
               </TableRow>
             );
@@ -333,6 +355,9 @@ const useRuleListStyles = makeStyles({
   tableCell: {
     fontWeight: 100,
     fontSize: '12px',
+  },
+  tableOptCell: {
+    width: '300px',
   },
   noData: {
     padding: '20px 0',
@@ -411,36 +436,72 @@ const RuleList: React.FC = () => {
     }
   };
 
-  const okHandle = (type: 'local' | 'remote' = 'local') => json => {
-    const ns = resetNSData(json, type);
-
-    if (!ns) {
-      toast.error('配置数据格式错误');
-      return;
-    }
-
-    dispatch({
-      type: 'addNS',
-      payload: {
-        ns,
+  const okHandle = (
+    type: 'local' | 'remote',
+    opt: 'new' | 'update' = 'new',
+    extra?: { nsId?: string; remoteUrl?: string },
+  ) => json => {
+    const ns = resetNSData(json, {
+      onNSChange: ns => {
+        if (type === 'remote') {
+          ns.remoteUrl = extra.remoteUrl;
+        }
+        ns.type = type;
       },
     });
+
+    if (!ns) {
+      throw new Error('配置数据格式错误');
+    }
+
+    if (opt === 'new') {
+      dispatch({
+        type: 'addNS',
+        payload: {
+          ns,
+        },
+      });
+    } else {
+      dispatch({
+        type: 'replaceNS',
+        payload: {
+          nsId: extra.nsId,
+          ns,
+        },
+      });
+    }
   };
 
   const errHandle = msg => {
-    toast.error(msg);
+    toast.error(msg?.message);
   };
 
-  const onImportNS = () => {
-    loadJSONFile().then(okHandle('local'), errHandle);
-  };
-
-  const onHttpImportNS = () => {
-    loadRemoteJSON(importUrl)
-      .then(okHandle('remote'), errHandle)
+  const onImportLocalNS = () => {
+    loadJSONFile()
+      .then(okHandle('local', 'new'))
       .then(() => {
+        toast.success('导入成功');
+      })
+      .catch(errHandle);
+  };
+
+  const onImportRemoteNS = () => {
+    loadRemoteJSON(importUrl)
+      .then(okHandle('remote', 'new', { remoteUrl: importUrl }))
+      .then(() => {
+        toast.success('导入成功');
         setImportUrlOpen(false);
-      });
+      })
+      .catch(errHandle);
+  };
+
+  const onUpdateRemoteNS = ({ id, remoteUrl }: Namespace) => {
+    loadRemoteJSON(remoteUrl)
+      .then(okHandle('remote', 'update', { nsId: id, remoteUrl }), errHandle)
+      .then(() => {
+        toast.success('更新成功');
+      })
+      .catch(errHandle);
   };
 
   const okHandle = (type: 'local' | 'remote' = 'local') => json => {
@@ -500,7 +561,7 @@ const RuleList: React.FC = () => {
               size="large"
               variant="contained"
               color="primary"
-              onClick={onImportNS}
+              onClick={onImportLocalNS}
             >
               <DesktopWindowsIcon fontSize="small" />
             </Button>
@@ -516,7 +577,7 @@ const RuleList: React.FC = () => {
             </Button>
           </Tooltip>
         </ButtonGroup>
-        {/* <MoreVertIcon /> */}
+        <MoreButton />
       </Header>
       <div className={classes.tableContainer}>
         <Table className={classes.table} aria-label="collapsible table">
@@ -528,7 +589,10 @@ const RuleList: React.FC = () => {
               <TableCell className={classes.tableCell} align="center">
                 开启状态
               </TableCell>
-              <TableCell className={classes.tableCell} align="right">
+              <TableCell
+                className={cx(classes.tableCell, classes.tableOptCell)}
+                align="right"
+              >
                 操作
               </TableCell>
             </TableRow>
@@ -536,7 +600,12 @@ const RuleList: React.FC = () => {
           <TableBody>
             {namespaces.length ? (
               namespaces.map(ns => (
-                <Row key={ns.id} rowData={ns} onChange={onRowChange} />
+                <Row
+                  key={ns.id}
+                  rowData={ns}
+                  onChange={onRowChange}
+                  onUpdateRemoteNS={onUpdateRemoteNS}
+                />
               ))
             ) : (
               <TableRow>
@@ -582,7 +651,7 @@ const RuleList: React.FC = () => {
       </Dialog>
 
       <Dialog
-        open={!!importUrlOpen}
+        open={importUrlOpen}
         fullWidth
         onClose={() => setImportUrlOpen(false)}
         aria-labelledby="alert-dialog-title"
@@ -605,8 +674,8 @@ const RuleList: React.FC = () => {
           <Button onClick={() => setImportUrlOpen(false)} color="primary">
             取消
           </Button>
-          <Button onClick={onHttpImportNS} color="primary" autoFocus>
-            保存
+          <Button onClick={onImportRemoteNS} color="primary" autoFocus>
+            导入
           </Button>
         </DialogActions>
       </Dialog>

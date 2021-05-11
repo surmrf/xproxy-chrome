@@ -1,10 +1,7 @@
 import { v4 as uuid } from 'uuid';
 import type { Namespace, Group, Rule } from './type';
 
-export function createNamespace({
-  id,
-  name,
-}: { id?: Namespace['id']; name?: Namespace['name'] } = {}): Namespace {
+export function createNamespace({ id, name }: Partial<Namespace>): Namespace {
   return {
     type: 'local',
     id: id || uuid(),

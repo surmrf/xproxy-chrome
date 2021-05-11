@@ -200,13 +200,13 @@ const Row: React.FC<{
           {rowData.name}
         </TableCell>
         <TableCell>
-          {rowData.type === 'local' ? (
+          {rowData.type === 'remote' ? (
+            <CloudDownloadIcon className={classes.nsTypeIcon} />
+          ) : (
             <DesktopWindowsIcon
               className={classes.nsTypeIcon}
               fontSize="small"
             />
-          ) : (
-            <CloudDownloadIcon className={classes.nsTypeIcon} />
           )}
         </TableCell>
         <TableCell className={classes.tableCell} align="center">

@@ -11,6 +11,7 @@ import {
   IconButton,
   Tooltip,
 } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 import {
   Save as SaveIcon,
   AddCircle as AddCircleIcon,
@@ -20,7 +21,7 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { produce } from 'immer';
 import { createGroup, createRule } from '@/utils/rule/factory';
-import type { Group, Rule } from '@/utils/rule/type';
+import type { Group, Namespace, Rule } from '@/utils/rule/type';
 import { defaultNSId } from '@/store';
 import { useGlobalStore } from '@/store/Provider';
 import Header from '../../components/Header';
@@ -252,6 +253,7 @@ export default () => {
   const classes = useRuleStyles();
   const [{ state }, dispatch] = useGlobalStore();
   const [namespace, setNamespace] = useState('');
+  const [nsType, setNSType] = useState<Namespace['type']>('local');
   const [group, setGroup] = useState<Partial<Group>>({ name: '' });
   const [rules, setRules] = useState<Rule[]>([]);
   const isEdit = !!(nsId && groupId);
@@ -277,6 +279,7 @@ export default () => {
       }
 
       setNamespace(nsId);
+      setNSType(ns.type);
       setGroup(group);
       setRules(group?.rules);
     } else {
@@ -366,12 +369,18 @@ export default () => {
 
   return (
     <div>
+      {nsType === 'remote' ? (
+        <Alert severity="info">
+          远程规则不支持修复。如需修改，可先导出后本地导入修复
+        </Alert>
+      ) : null}
       <Header title="新增规则">
         <Button
           variant="contained"
           color="primary"
           startIcon={<SaveIcon />}
           onClick={onSave}
+          disabled={nsType === 'remote'}
         >
           保存
         </Button>

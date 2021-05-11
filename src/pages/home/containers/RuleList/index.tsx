@@ -242,9 +242,13 @@ const Row: React.FC<{
             }}
           >
             <MenuItem onClick={onAddRuleGroup}>新建规则组</MenuItem>
-            <MenuItem onClick={onChangeNSName}>更改空间名</MenuItem>
-            <MenuItem onClick={onExportNSData}>导出空间</MenuItem>
-            {rowData?.remoteUrl ? (
+            {nsId !== defaultNSId ? (
+              <MenuItem onClick={onChangeNSName}>更改空间名</MenuItem>
+            ) : null}
+            {nsId !== defaultNSId ? (
+              <MenuItem onClick={onExportNSData}>导出空间</MenuItem>
+            ) : null}
+            {nsId !== defaultNSId && rowData?.remoteUrl ? (
               <MenuItem onClick={onUpdateNSData}>更新空间</MenuItem>
             ) : null}
             {nsId !== defaultNSId ? (

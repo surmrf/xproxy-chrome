@@ -504,38 +504,6 @@ const RuleList: React.FC = () => {
       .catch(errHandle);
   };
 
-  const okHandle = (type: 'local' | 'remote' = 'local') => json => {
-    const ns = resetNSData(json, type);
-
-    if (!ns) {
-      toast.error('配置数据格式错误');
-      return;
-    }
-
-    dispatch({
-      type: 'addNS',
-      payload: {
-        ns,
-      },
-    });
-  };
-
-  const errHandle = msg => {
-    toast.error(msg);
-  };
-
-  const onImportNS = () => {
-    loadJSONFile().then(okHandle('local'), errHandle);
-  };
-
-  const onHttpImportNS = () => {
-    loadRemoteJSON(importUrl)
-      .then(okHandle('remote'), errHandle)
-      .then(() => {
-        setImportUrlOpen(false);
-      });
-  };
-
   return (
     <div className={classes.ruleList}>
       <Header title="规则管理">

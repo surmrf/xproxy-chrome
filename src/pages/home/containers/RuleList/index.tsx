@@ -241,7 +241,9 @@ const Row: React.FC<{
               setAnchorEl(null);
             }}
           >
-            <MenuItem onClick={onAddRuleGroup}>新建规则组</MenuItem>
+            {rowData.type !== 'remote' ? (
+              <MenuItem onClick={onAddRuleGroup}>新建规则组</MenuItem>
+            ) : null}
             {nsId !== defaultNSId ? (
               <MenuItem onClick={onChangeNSName}>更改空间名</MenuItem>
             ) : null}
@@ -301,19 +303,21 @@ const Row: React.FC<{
                       <EditIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="删除规则组">
-                    <IconButton
-                      onClick={() => {
-                        deleteStagedInfo.current = {
-                          type: 'group',
-                          data: group,
-                        };
-                        setOpenDialog(true);
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
+                  {rowData.type !== 'remote' ? (
+                    <Tooltip title="删除规则组">
+                      <IconButton
+                        onClick={() => {
+                          deleteStagedInfo.current = {
+                            type: 'group',
+                            data: group,
+                          };
+                          setOpenDialog(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  ) : null}
                   {/* <Tooltip title="复制规则组">
                     <IconButton className={classes.iconSpace}>
                       <FileCopyIcon fontSize="small" />

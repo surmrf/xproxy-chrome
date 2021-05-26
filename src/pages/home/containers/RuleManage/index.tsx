@@ -371,7 +371,7 @@ export default () => {
     <div>
       {nsType === 'remote' ? (
         <Alert severity="info">
-          远程规则不支持修复。如需修改，可先导出后本地导入修复
+          远程规则不支持直接修复。如需修改，可先导出副本再从本地导入后修复
         </Alert>
       ) : null}
       <Header title="新增规则">

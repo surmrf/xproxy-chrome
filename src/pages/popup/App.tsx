@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Switch, Button } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 import { makeStyles } from '@material-ui/core/styles';
 import { Group } from '@/store';
 import Provider, { useGlobalStore } from '@/store/Provider';
@@ -18,6 +19,9 @@ const useStyles = makeStyles({
     justifyContent: 'space-between',
     paddingBottom: '15px',
     borderBottom: '1px solid #eee',
+  },
+  ruleConflict: {
+    paddingBottom: '15px',
   },
   groupRows: {
     padding: '10px 0',
@@ -86,6 +90,8 @@ const App: React.FC = () => {
       }, [])
       .filter(group => group.star);
   }, [state]);
+
+  const openMultiGroup = groups.filter(group => group.status).length > 1;
 
   const onChange = ({ nsId, groupId, checked }) => () => {
     dispatch({
@@ -161,6 +167,11 @@ const App: React.FC = () => {
           <div className={classes.noData}>没有收藏的规则组哦</div>
         )}
       </div>
+      {openMultiGroup ? (
+        <div className={classes.ruleConflict}>
+          <Alert severity="warning">开启多个规则组时，请注意规则互斥</Alert>
+        </div>
+      ) : null}
     </div>
   );
 };

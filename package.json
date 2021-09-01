@@ -7,8 +7,8 @@
     "clean": "rimraf lib",
     "predev": "rimraf lib",
     "prebuild": "rimraf lib",
-    "dev": "webpack --progress --watch --config ./build/webpack.config.dev.js",
-    "build": "webpack --progress --config ./build/webpack.config.prod.js"
+    "dev": "cross-env NODE_ENV=development webpack --progress --watch --config ./build/webpack.config.dev.js",
+    "build": "cross-env NODE_ENV=production webpack --progress --config ./build/webpack.config.prod.js"
   },
   "devDependencies": {
     "@babel/core": "^7.12.13",
@@ -31,6 +31,7 @@
     "babel-loader": "^8.2.2",
     "babel-plugin-import": "^1.13.3",
     "copy-webpack-plugin": "^7.0.0",
+    "cross-env": "^7.0.3",
     "css-loader": "^5.0.2",
     "eslint": "^7.19.0",
     "eslint-config-prettier": "^7.2.0",

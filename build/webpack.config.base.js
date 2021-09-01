@@ -3,6 +3,8 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const WebpackBar = require('webpackbar');
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const config = {
   context: path.join(__dirname, '..'),
   entry: {
@@ -83,7 +85,18 @@ const config = {
         './src/manifest.json',
         {
           from: './src/assets/**/*.png',
+          filter: async resourcePath => {
+            if (isDev && /icon@/.test(resourcePath)) {
+              return false;
+            } else if (!isDev && /icon_dev@/.test(resourcePath)) {
+              return false;
+            }
+            return true;
+          },
           to: ({ absoluteFilename }) => {
+            if (isDev && /icon_dev@/.test(absoluteFilename)) {
+              absoluteFilename = absoluteFilename.replace('_dev', '');
+            }
             return absoluteFilename.replace('src/', 'lib/');
           },
         },

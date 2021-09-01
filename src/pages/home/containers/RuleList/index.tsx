@@ -444,41 +444,43 @@ const RuleList: React.FC = () => {
     }
   };
 
-  const okHandle = (
-    type: 'local' | 'remote',
-    opt: 'new' | 'update' = 'new',
-    extra?: { nsId?: string; remoteUrl?: string },
-  ) => json => {
-    const ns = resetNSData(json, {
-      onNSChange: ns => {
-        if (type === 'remote') {
-          ns.remoteUrl = extra.remoteUrl;
-        }
-        ns.type = type;
-      },
-    });
-
-    if (!ns) {
-      throw new Error('配置数据格式错误');
-    }
-
-    if (opt === 'new') {
-      dispatch({
-        type: 'addNS',
-        payload: {
-          ns,
+  const okHandle =
+    (
+      type: 'local' | 'remote',
+      opt: 'new' | 'update' = 'new',
+      extra?: { nsId?: string; remoteUrl?: string },
+    ) =>
+    json => {
+      const ns = resetNSData(json, {
+        onNSChange: ns => {
+          if (type === 'remote') {
+            ns.remoteUrl = extra.remoteUrl;
+          }
+          ns.type = type;
         },
       });
-    } else {
-      dispatch({
-        type: 'replaceNS',
-        payload: {
-          nsId: extra.nsId,
-          ns,
-        },
-      });
-    }
-  };
+
+      if (!ns) {
+        throw new Error('配置数据格式错误');
+      }
+
+      if (opt === 'new') {
+        dispatch({
+          type: 'addNS',
+          payload: {
+            ns,
+          },
+        });
+      } else {
+        dispatch({
+          type: 'replaceNS',
+          payload: {
+            nsId: extra.nsId,
+            ns,
+          },
+        });
+      }
+    };
 
   const errHandle = msg => {
     toast.error(msg?.message);

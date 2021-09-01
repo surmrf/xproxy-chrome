@@ -93,22 +93,26 @@ const App: React.FC = () => {
 
   const openMultiGroup = groups.filter(group => group.status).length > 1;
 
-  const onChange = ({ nsId, groupId, checked }) => () => {
-    dispatch({
-      type: 'groupSwitch',
-      payload: {
-        nsId,
-        groupId,
-        checked,
-      },
-    });
-  };
+  const onChange =
+    ({ nsId, groupId, checked }) =>
+    () => {
+      dispatch({
+        type: 'groupSwitch',
+        payload: {
+          nsId,
+          groupId,
+          checked,
+        },
+      });
+    };
 
-  const onGroupEdit = ({ nsId, groupId }) => () => {
-    chrome.tabs.create({
-      url: `pages/home/index.html#/rule/edit/${nsId}/${groupId}`,
-    });
-  };
+  const onGroupEdit =
+    ({ nsId, groupId }) =>
+    () => {
+      chrome.tabs.create({
+        url: `pages/home/index.html#/rule/edit/${nsId}/${groupId}`,
+      });
+    };
 
   const onOpenHome = () => {
     chrome.tabs.create({
